@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * Implements hook_node_info()
+ */
+function friend_node_info() {
+    return array(
+        'friend' => array(
+            'name' => t('Friend'),
+            'base' => 'friend',
+            'description' => t('New Friend'),
+            'has_title' => TRUE,
+            'title_label' => t('Friend')
+         )
+    );
+}
+
+/**
+ * Implement hook_form()
+ */
+function friend_form($node, $form_state) {
+    return node_content_form($node, $form_state);
+}

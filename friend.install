@@ -1,0 +1,178 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function friend_install() {
+    node_types_rebuild();
+    $types = node_type_get_types();
+    node_add_body_field($types['friend']); 
+    add_custom_fields();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function friend_uninstall() {
+    $ournewtype = 'friend';
+    $sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
+    $nodeids = db_query($sql, array(':type' => $ournewtype))->fetchCol();
+    node_delete_multiple($nodeids);
+    $node_type = node_type_load($ournewtype);
+    node_type_delete($node_type);
+    delete_custom_fields();
+    field_purge_batch(500);
+}
+
+function delete_custom_fields() {
+  foreach (array_keys(_friend_installed_fields()) as $field) {
+      field_delete_field($field);
+  }
+  $instances = field_info_instances('node', 'friend');
+  foreach ($instances as $instance_name => $fieldinstance) {
+      field_delete_instance($fieldinstance);
+  }
+}
+
+function _friend_installed_fields() {
+  $t = get_t();
+  return array(
+      'friend_name' => array(
+          'field_name' => 'friend_name',
+          'label' => $t('Name'),
+          'type' => 'text'
+      ),
+      'friend_fname' => array(
+          'field_name' => 'friend_fname',
+          'label' => $t('First name'),
+          'type' => 'text'
+      ),
+      'friend_email' => array(
+          'field_name' => 'friend_email',
+          'label' => $t('eMail'),
+          'type' => 'email'
+      ),
+      'friend_bdate' => array(
+          'field_name' => 'friend_bdate',
+          'label' => $t('Birthday'),
+          'type' => 'datetime'
+      ),
+      'friend_avatar' => array(
+          'field_name' => 'friend_avatar',
+          'label' => $t('Avatar'),
+          'type' => 'image'
+      )
+  );
+}
+
+function _friend_installed_instances() {
+  $t = get_t();
+  return array(
+      'friend_name' => array(
+          'field_name' => 'friend_name',
+          'type' => 'text',
+          'label' => $t('Name'),
+          'widget' => array(
+              'type' => 'text_textfield'
+          ),
+          'display' => array(
+              'example_node_list' => array(
+                  'label' => $t('Name'),
+                  'type' => 'text'
+              )
+          )
+      ),
+      'friend_email' => array(
+          'field_name' => 'friend_email',
+          'type' => 'email',
+          'label' => $t('eMail'),
+          'widget' => array(
+              'type' => 'email_textfield'
+          ),
+          'display' => array(
+              'example_node_list' => array(
+                  'label' => $t('eMail'),
+                  'type' => 'email'
+              )
+          )
+      ),
+      'friend_bdate' => array(
+          'field_name' => 'friend_bdate',
+          'type' => 'datetime',
+          'label' => $t('Birthday'),
+          'settings' => array(
+            'granularity' => array(
+                'day' => 'day',
+                'month' => 'month',
+                'year' => 'year',
+                'hour' => 'hour',
+                'minute' => 'minute',
+                'second' => 0,
+            ),
+            'tz_handling' => 'site',
+            'timezone_db' => 'UTC',
+            'cache_enabled' => 0,
+            'cache_count' => '4',
+            'todate' => 'required',
+        ),
+          'widget' => array(
+              'type' => 'date_text'
+          ),
+          'display' => array(
+              'example_node_list' => array(
+                  'label' => $t('Birthday'),
+                  'type' => 'datetime'
+              )
+          )
+      ),
+      'friend_fname' => array(
+          'field_name' => 'friend_fname',
+          'type' => 'text',
+          'label' => $t('First name'),
+          'widget' => array(
+              'type' => 'text_textfield'
+          ),
+          'display' => array(
+              'example_node_list' => array(
+                  'label' => $t('First name'),
+                  'type' => 'text'
+              )
+          )
+      ),
+      'friend_avatar' => array(
+          'field_name' => 'friend_avatar',
+          'type' => 'image',
+          'label' => $t('Avatar'),
+          'widget' => array(
+            'preview_image_style' => 'thumbnail',
+            'progress_indicator' => 'throbber',
+          ),
+          'display' => array(
+            'default' => array(
+              'label' => 'hidden',
+              'type' => 'image',
+              'settings' => array('image_style' => 'thumbnail', 'image_link' => ''),
+              'weight' => -1,
+            ),
+            'teaser' => array(
+              'label' => 'hidden',
+              'type' => 'image',
+              'settings' => array('image_style' => 'thumbnail', 'image_link' => 'content'),
+              'weight' => -1,
+            ),
+          )
+      )
+  );
+}
+
+function add_custom_fields() {
+  foreach (_friend_installed_fields() as $field) {
+      field_create_field($field);
+  }
+  foreach (_friend_installed_instances() as $fieldinstance) {
+      $fieldinstance['entity_type'] = 'node';
+      $fieldinstance['bundle'] = 'friend';
+      print_r($fieldinstance);
+      field_create_instance($fieldinstance);
+  }
+}

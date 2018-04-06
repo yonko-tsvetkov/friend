@@ -1,0 +1,7 @@
+name = friend
+description = Add new cont type and fields
+core = 7.x
+dependencies[] = email:email
+dependencies[] = date:date
+files[] = friend.install
+files[] = friend.module
