@@ -1,7 +1,9 @@
-name = friend
+name = Friend 
 description = Add new cont type and fields
 core = 7.x
-dependencies[] = email:email
-dependencies[] = date:date
+package = Friend
+dependencies[] = email
+dependencies[] = date
 files[] = friend.install
 files[] = friend.module
+stylesheets[all][] = css/friend.css
